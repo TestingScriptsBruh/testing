@@ -1,0 +1,84 @@
+-- This script should be placed in a LocalScript, for example, in StarterPlayerScripts or StarterGui
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local roleAssignedEvent = game.ReplicatedStorage:WaitForChild("RoleAssignedEvent")
+
+-- Function to highlight a player
+local function highlightPlayer(targetPlayer, role)
+    local highlightColor
+    if role == "Imposter" then
+        highlightColor = BrickColor.new("Bright red")
+    elseif role == "Investigator" then
+        highlightColor = BrickColor.new("Bright green")
+    else
+        return
+    end
+    
+    -- Create a highlight part to show around the player
+    local highlight = Instance.new("SelectionBox")
+    highlight.Adornee = targetPlayer.Character
+    highlight.LineThickness = 0.05
+    highlight.Color3 = highlightColor.Color
+    highlight.Parent = targetPlayer.Character
+
+    -- Remove the highlight after a certain duration, if needed
+    wait(5)
+    highlight:Destroy()
+end
+
+-- Function to highlight the name of the imposter
+local function highlightImposterName(imposter)
+    if imposter then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Size = UDim2.new(0, 200, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.Adornee = imposter.Character:FindFirstChild("Head")
+        billboard.AlwaysOnTop = true
+
+        local textLabel = Instance.new("TextLabel", billboard)
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.Text = "IMPOSTOR"
+        textLabel.TextColor3 = Color3.new(1, 0, 0)
+        textLabel.TextScaled = true
+
+        billboard.Parent = imposter.Character
+
+        -- Remove the billboard after a certain duration, if needed
+        wait(5)
+        billboard:Destroy()
+    end
+end
+
+-- Function to show investigator words to the impostor
+local function showInvestigatorWords()
+    local investigators = {}
+    
+    for _, otherPlayer in pairs(Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer:FindFirstChild("Role") and otherPlayer.Role.Value == "Investigator" then
+            table.insert(investigators, otherPlayer.Name)
+        end
+    end
+    
+    -- Display the names of investigator players (you can customize this part)
+    print("Investigators: " .. table.concat(investigators, ", "))
+end
+
+-- Function to handle role assignment
+local function onRoleAssigned(role)
+    local targetPlayer = Players:FindFirstChild("PATRICKPOGI0981")
+    if targetPlayer then
+        highlightPlayer(targetPlayer, role)
+    end
+
+    if role == "Imposter" then
+        showInvestigatorWords()
+        
+        -- Highlight the name of the impostor
+        highlightImposterName(player)
+    end
+end
+
+-- Trigger the function when roles are assigned
+roleAssignedEvent.OnClientEvent:Connect(onRoleAssigned)
